@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fitnex – Workout Planner by Shivansh</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#e9eef2;--surface:#fff;--ink:#12202b;--muted:#51626f;--line:#c9d3da;--accent:#2447f5;--on-accent:#fff;--plate:#f2c230;--field:#f5f8fa;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101a22;--surface:#18252f;--ink:#eef3f6;--muted:#9fb1bd;--line:#2c3d49;--accent:#7b93ff;--on-accent:#0b1220;--plate:#f2c230;--field:#101a22}}
+:root[data-theme="dark"]{--bg:#101a22;--surface:#18252f;--ink:#eef3f6;--muted:#9fb1bd;--line:#2c3d49;--accent:#7b93ff;--on-accent:#0b1220;--plate:#f2c230;--field:#101a22}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:28px 18px 56px}
+h1,h2,h3{font-family:"Barlow Condensed",Impact,sans-serif;margin:0;line-height:1}
+h1{font-size:clamp(52px,14vw,88px);font-weight:800;letter-spacing:-.01em}
+h1 span{display:inline-block;background:var(--plate);color:#12202b;padding:0 .18em;border-radius:50%/50%;margin-right:.08em}
+.lede{color:var(--muted);max-width:46ch;margin:14px 0 26px;font-size:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:18px}
+h2{font-size:30px;font-weight:800;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
+input,select{width:100%;font:inherit;padding:11px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.full{grid-column:1/-1}
+button{font:600 18px "Barlow Condensed",sans-serif;letter-spacing:.02em;width:100%;padding:14px;border:0;border-radius:10px;background:var(--accent);color:var(--on-accent);cursor:pointer;margin-top:6px}
+button:active{transform:translateY(1px)}
+.err{color:#c0392b;font-weight:600;margin:8px 0 0;min-height:1.4em}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{border-left:5px solid var(--plate);padding:4px 0 4px 12px}
+.stat b{font:800 44px "Barlow Condensed",sans-serif;display:block;line-height:1}
+.stat small{color:var(--muted)}
+.note{color:var(--muted);font-size:14px;margin:12px 0 0}
+.day{border-top:1px solid var(--line);padding:16px 0}
+.day:first-of-type{border-top:0}
+.day h3{font-size:24px;margin-bottom:2px}
+.day .focus{color:var(--muted);font-size:14px;margin:0 0 8px}
+.ex{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.ex:last-child{border-bottom:0}
+.ex span:last-child{font-weight:600;white-space:nowrap}
+.rest{color:var(--muted)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1><span>F</span>itnex</h1>
+<p style="margin:8px 0 0;color:var(--muted);font-weight:600">by Shivansh</p>
+<p class="lede">Tell us a little about you and what you want to look like. Get your BMI, an estimated body fat %, and a weekly workout plan.</p>
+
+<section class="card">
+<h2>About you</h2>
+<div class="grid">
+<div><label for="age">Age</label><input id="age" type="number" inputmode="numeric" min="14" max="90" placeholder="25"></div>
+<div><label for="sex">Sex</label><select id="sex"><option value="m">Male</option><option value="f">Female</option></select></div>
+<div><label for="wt">Weight (kg)</label><input id="wt" type="number" inputmode="decimal" min="30" max="250" placeholder="70"></div>
+<div><label for="ht">Height (cm)</label><input id="ht" type="number" inputmode="decimal" min="120" max="230" placeholder="175"></div>
+<div class="full"><label for="goal">Your goal</label>
+<select id="goal">
+<option value="vtaper">V-taper body (wide shoulders, slim waist)</option>
+<option value="muscle">Build muscle</option>
+<option value="fat">Lose fat</option>
+<option value="strength">Get stronger</option>
+<option value="fit">General fitness</option>
+</select></div>
+<div class="full"><label for="days">Days per week</label>
+<select id="days"><option>3</option><option selected>4</option><option>5</option></select></div>
+</div>
+<button id="go" type="button">Build my plan</button>
+<p class="err" id="err" role="alert"></p>
+</section>
+
+<div id="out" hidden>
+<section class="card">
+<h2>Your numbers</h2>
+<div class="stats">
+<div class="stat"><b id="bmi"></b><small id="bmiCat"></small></div>
+<div class="stat"><b id="bf"></b><small id="bfCat"></small></div>
+</div>
+<p class="note">BMI uses weight and height only. Body fat % is an estimate from BMI, age and sex (Deurenberg formula) and can be off by several points, especially for very muscular people. A tape measure or skinfold test is more accurate.</p>
+<p class="note" id="advice"></p>
+</section>
+<section class="card">
+<h2 id="planTitle">Your plan</h2>
+<div id="plan"></div>
+<p class="note">Warm up 5 minutes first. Rest 60–90 seconds between sets. When you can finish all reps easily, add a little weight or one more rep. Stop if anything hurts, and check with a doctor before starting if you have a health condition.</p>
+</section>
+</div>
+</main>
+<script>
+var P={
+vtaper:{name:"V-taper plan",days:[
+["Shoulders & arms","Build wide shoulders",[["Lateral raises","3 × 12–15"],["Overhead dumbbell press","3 × 8–12"],["Push-ups","3 × 12–15 (or max)"],["Rear delt fly","3 × 15"],["Triceps dips","3 × 10–12"]]],
+["Back width","Wide back, narrow waist",[["Pull-ups or lat pulldown","4 × 8–12"],["One-arm dumbbell row","3 × 10–12"],["Face pulls","3 × 15"],["Lateral raises","3 × 12–15"],["Biceps curls","3 × 12"]]],
+["Legs & core","Keep the waist tight",[["Squats","3 × 12"],["Walking lunges","3 × 10 each leg"],["Glute bridge","3 × 15"],["Plank","3 × 40 sec"],["Leg raises","3 × 12"]]],
+["Chest & shoulders","Fill out the top half",[["Push-ups","3 × 12–15 (or max)"],["Incline dumbbell press","3 × 8–12"],["Lateral raises","4 × 12–15"],["Upright row","3 × 12"],["Vacuum hold","4 × 20 sec"]]],
+["Back & core","Thicker lats",[["Chin-ups","3 × max"],["Seated cable row","3 × 10–12"],["Straight-arm pulldown","3 × 12–15"],["Hanging knee raise","3 × 12"],["Side plank","3 × 30 sec each"]]]]},
+muscle:{name:"Muscle-building plan",days:[
+["Push","Chest, shoulders, triceps",[["Bench or floor press","4 × 8–10"],["Overhead press","3 × 8–10"],["Lateral raises","3 × 12–15"],["Push-ups","2 × max"],["Triceps extensions","3 × 12"]]],
+["Pull","Back and biceps",[["Pull-ups or pulldown","4 × 8–10"],["Barbell or dumbbell row","3 × 8–10"],["Face pulls","3 × 15"],["Biceps curls","3 × 10–12"]]],
+["Legs","Quads, hamstrings, glutes",[["Squats","4 × 8–10"],["Romanian deadlift","3 × 8–10"],["Lunges","3 × 10 each leg"],["Calf raises","4 × 15"]]],
+["Upper body","Chest and back volume",[["Incline press","3 × 10"],["Cable or machine row","3 × 10"],["Lateral raises","3 × 15"],["Hammer curls","3 × 12"],["Dips","3 × 10"]]],
+["Lower body & core","Legs and abs",[["Front squat or goblet squat","3 × 10"],["Hip thrust","3 × 12"],["Split squat","3 × 10 each leg"],["Cable crunch","3 × 15"],["Plank","3 × 45 sec"]]]]},
+fat:{name:"Fat-loss plan",days:[
+["Full-body circuit","Do 3 rounds, rest 60 sec between",[["Squats","3 × 15"],["Push-ups","3 × 12–15"],["Dumbbell row","3 × 12"],["Mountain climbers","3 × 30 sec"]]],
+["Cardio + core","Steady effort you can talk through",[["Brisk walk, bike or jog","30–40 min"],["Plank","3 × 40 sec"],["Dead bug","3 × 12"],["Glute bridge","3 × 15"]]],
+["Full-body strength","Keep your muscle while losing fat",[["Goblet squat","3 × 12"],["Overhead press","3 × 10"],["Romanian deadlift","3 × 10"],["Lat pulldown or pull-ups","3 × 10"]]],
+["Intervals","30 sec hard, 60 sec easy",[["Bike, run or row","8 rounds"],["Jump rope or high knees","3 × 45 sec"],["Bicycle crunch","3 × 20"]]],
+["Full-body circuit","Do 4 rounds, rest 45 sec between",[["Lunges","4 × 12 each leg"],["Incline push-ups","4 × 12"],["Kettlebell swing or hip hinge","4 × 15"],["Burpees","4 × 8"]]]]},
+strength:{name:"Strength plan",days:[
+["Squat day","Heavy and controlled",[["Squat","5 × 5"],["Romanian deadlift","3 × 8"],["Walking lunge","3 × 8 each leg"],["Plank","3 × 45 sec"]]],
+["Press day","Upper-body push",[["Bench or floor press","5 × 5"],["Overhead press","4 × 6"],["Dips","3 × 8"],["Triceps extensions","3 × 10"]]],
+["Pull day","Upper-body pull",[["Deadlift","4 × 5"],["Pull-ups","4 × 6"],["Barbell row","3 × 8"],["Face pulls","3 × 15"]]],
+["Squat variation","Lighter, more reps",[["Front squat","4 × 6"],["Step-ups","3 × 10 each leg"],["Hip thrust","3 × 10"],["Hanging knee raise","3 × 12"]]],
+["Press variation","Upper-body accessories",[["Incline press","4 × 6"],["Push press","3 × 6"],["Chin-ups","3 × 8"],["Biceps curls","3 × 10"]]]]},
+fit:{name:"General fitness plan",days:[
+["Full body A","Strength basics",[["Squats","3 × 12"],["Push-ups","3 × 10–15"],["Dumbbell row","3 × 12"],["Plank","3 × 30 sec"]]],
+["Cardio","Pick what you enjoy",[["Jog, cycle or swim","25–35 min"],["Mobility stretches","10 min"]]],
+["Full body B","Strength basics",[["Lunges","3 × 10 each leg"],["Overhead press","3 × 10"],["Lat pulldown or band pull-apart","3 × 12"],["Glute bridge","3 × 15"]]],
+["Intervals + core","Short and sharp",[["Jump rope or fast walk","6 × 1 min on, 1 min off"],["Bicycle crunch","3 × 20"],["Side plank","3 × 30 sec each"]]],
+["Active day","Keep moving",[["Long walk or hike","45–60 min"],["Full-body stretch","10 min"]]]]}
+};
+var $=function(i){return document.getElementById(i)};
+function cat(b){return b<18.5?"Underweight":b<25?"Healthy range":b<30?"Overweight":"Obese range"}
+function bfCat(v,m){var l=m?[6,14,18,25]:[14,21,25,32],n=["Essential","Athletic","Fit","Average","Higher"];for(var i=0;i<4;i++)if(v<l[i])return n[i];return n[4]}
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+$("go").onclick=function(){
+ var age=+$("age").value,wt=+$("wt").value,ht=+$("ht").value,m=$("sex").value==="m",g=$("goal").value,d=+$("days").value;
+ if(!(age>=14&&age<=90)||!(wt>=30&&wt<=250)||!(ht>=120&&ht<=230)){$("err").textContent="Enter an age of 14–90, weight of 30–250 kg and height of 120–230 cm.";return}
+ $("err").textContent="";
+ var bmi=wt/Math.pow(ht/100,2),bf=Math.max(3,1.2*bmi+0.23*age-10.8*(m?1:0)-5.4);
+ $("bmi").textContent=bmi.toFixed(1);$("bmiCat").textContent="BMI · "+cat(bmi);
+ $("bf").textContent=bf.toFixed(0)+"%";$("bfCat").textContent="Est. body fat · "+bfCat(bf,m);
+ var tip=bmi>=30?"Start with low-impact moves (incline push-ups, bike, brisk walking) and build up gradually.":bmi<18.5?"Eat enough to support training and focus on strength moves to build muscle.":"Your numbers suit a standard start. Progress a little each week.";
+ $("advice").textContent=tip;
+ var pl=P[g],html="",w=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],slots={3:[0,2,4],4:[0,1,3,4],5:[0,1,2,3,4]}[d],k=0;
+ for(var i=0;i<7;i++){
+  if(slots.indexOf(i)>-1){var x=pl.days[k++%pl.days.length];
+   html+='<div class="day"><h3>'+w[i]+' – '+esc(x[0])+'</h3><p class="focus">'+esc(x[1])+'</p>'+x[2].map(function(e){return'<div class="ex"><span>'+esc(e[0])+'</span><span>'+esc(e[1])+'</span></div>'}).join("")+'</div>'}
+  else html+='<div class="day rest"><h3>'+w[i]+' – Rest</h3><p class="focus">Walk, stretch, sleep well.</p></div>'}
+ $("plan").innerHTML=html;$("planTitle").textContent=pl.name;
+ $("out").hidden=false;$("out").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"});
+};
+</script>
+</body>
+</html>
